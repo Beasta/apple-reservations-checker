@@ -8,10 +8,23 @@ import http from 'http'
 import bodyParser from 'koa-bodyparser'
 import Router from 'koa-router'
 import { Mailgun } from 'mailgun'
+import nodemailer from 'nodemailer'
 const router = Router()
 const app = new Koa()
 const server = require('http').Server(app.callback())
+
+/* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE VARIABLE*/
 const mg = new Mailgun(/* ENTER YOUR MAILGUN API KEY HERE AS A STRING */)
+const smtp = nodemailer.createTransport({
+  host: 'smtp-mail.outlook.com',
+  port: 587,
+  auth: {
+    user: 'EMAIL@DOMAIN.COM', // ENTER YOUR EMAIL USERNAME HERE
+    pass: 'PASSWORD' // ENTER YOUR PASSWORD HERE
+  }
+})
+/* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE VARIABLE*/
+
 let pastSentEmail
 const getAvailibility = async () => {
   process.stdout.write('!')
@@ -63,7 +76,20 @@ const getAvailibility = async () => {
   if (contact && JSON.stringify(pastSentEmail) !== JSON.stringify(body)) {
     console.log(JSON.stringify(availability, null, 2))
     pastSentEmail = body
+    /* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE AREA*/
     mg.sendText(/* PUT YOUR SENDER ADDRESS HERE */, [/* PUT YOUR "SEND TO" EMAIL HERE */], 'Good news! An iPhone reservation is availible!', JSON.stringify(body, null, 2))
+    const mailOptions = {
+      from: '"FIRSTNAME LASTNAME" <EMAIL@DOMAIN.COM>', /* PUT YOUR SENDER ADDRESS HERE */
+      to: 'EMAIL@DOMAIN.COM', /* PUT YOUR "SEND TO" EMAIL HERE */
+      subject: 'Good news! An iPhone reservation is availible!',
+      text: JSON.stringify(body, null, 2),
+      html: JSON.stringify(body, null, 2)
+    }
+    smtp.sendMail(mailOptions, (err, info) => {
+      if (err) console.error(err)
+      else console.log('Message sent: ' + info.response);
+    })
+    /* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE AREA*/
   }
   return body
 }
