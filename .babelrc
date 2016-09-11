@@ -1,4 +1,4 @@
 {
   "presets": ["es2015", "stage-1"],
-  "plugins": ["transform-async-to-generator", "transform-object-assign", "transform-decorators-legacy", "transform-function-bind"]
+  "plugins": ["transform-async-to-generator"]
 }
