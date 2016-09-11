@@ -12,18 +12,7 @@ import nodemailer from 'nodemailer'
 const router = Router()
 const app = new Koa()
 const server = require('http').Server(app.callback())
-
-/* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE VARIABLE*/
-const mg = new Mailgun(/* ENTER YOUR MAILGUN API KEY HERE AS A STRING */)
-const smtp = nodemailer.createTransport({
-  host: 'smtp-mail.outlook.com',
-  port: 587,
-  auth: {
-    user: 'EMAIL@DOMAIN.COM', // ENTER YOUR EMAIL USERNAME HERE
-    pass: 'PASSWORD' // ENTER YOUR PASSWORD HERE
-  }
-})
-/* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE VARIABLE*/
+const dotenv = require('dotenv').config()
 
 let pastSentEmail
 const getAvailibility = async () => {
@@ -76,19 +65,37 @@ const getAvailibility = async () => {
   if (contact && JSON.stringify(pastSentEmail) !== JSON.stringify(body)) {
     console.log(JSON.stringify(availability, null, 2))
     pastSentEmail = body
-    /* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE AREA*/
-    mg.sendText('EMAIL@DOMAIN.COM' /* PUT YOUR SENDER ADDRESS HERE */, ['EMAIL@DOMAIN>COM' /* PUT YOUR "SEND TO" EMAIL HERE */], 'Good news! An iPhone reservation is availible!', `<pre>${JSON.stringify(body, null, 2)}</pre>`)
-    const mailOptions = {
-      from: '"FIRSTNAME LASTNAME" <EMAIL@DOMAIN.COM>', /* PUT YOUR SENDER ADDRESS HERE */
-      to: 'EMAIL@DOMAIN.COM', /* PUT YOUR "SEND TO" EMAIL HERE */
-      subject: 'Good news! An iPhone reservation is availible!',
-      html: `<pre>${JSON.stringify(body, null, 2)}</pre>`
+    fromName = process.env.FROM_NAME
+    fromEmail = process.env.FROM_EMAIL
+    toEmail = process.env.TO_EMAIL
+    mailDriver = process.env.MAIL_DRIVER
+    
+    if (mailDriver == 'mailgun') {
+      const mg = new Mailgun(process.env.MAILGUN_API_KEY)
+      mg.sendText(fromEmail, [toEmail], 'Good news! An iPhone reservation is availible!', `<pre>${JSON.stringify(body, null, 2)}</pre>`)
     }
-    smtp.sendMail(mailOptions, (err, info) => {
-      if (err) console.error(err)
-      else console.log('Message sent: ' + info.response)
-    })
-    /* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE AREA*/
+    else if (mailDriver == 'smtp') {
+      const smtp = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        auth: {
+          user: process.env.SMTP_USERNAME,
+          pass: process.env.SMTP_PASSWORD
+        }
+      })
+      
+      const mailOptions = {
+        from: '"'+fromName+'" <'+fromEmail+'>',
+        to: toEmail,
+        subject: 'Good news! An iPhone reservation is availible!',
+        html: `<pre>${JSON.stringify(body, null, 2)}</pre>`
+      }
+      
+      smtp.sendMail(mailOptions, (err, info) => {
+        if (err) console.error(err)
+        else console.log('Message sent: ' + info.response)
+      })
+    }
   }
   return body
 }
