@@ -86,7 +86,7 @@ const getAvailibility = async () => {
     }
     smtp.sendMail(mailOptions, (err, info) => {
       if (err) console.error(err)
-      else console.log('Message sent: ' + info.response);
+      else console.log('Message sent: ' + info.response)
     })
     /* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE AREA*/
   }
