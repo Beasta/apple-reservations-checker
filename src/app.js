@@ -66,7 +66,7 @@ const getAvailibility = async () => {
   }
   if (contact) process.stdout.write('.')
   if (contact && JSON.stringify(pastSentEmail) !== JSON.stringify(body)) {
-    console.log(availability)
+    console.log(JSON.stringify(availability, null, 2))
     pastSentEmail = body
     mg.sendText(/* PUT YOUR SENDER ADDRESS HERE */, [/* PUT YOUR "SEND TO" EMAIL HERE */], 'Good news! An iPhone reservation is availible!', JSON.stringify(body, null, 2))
   }
