@@ -77,13 +77,12 @@ const getAvailibility = async () => {
     console.log(JSON.stringify(availability, null, 2))
     pastSentEmail = body
     /* DEPENDING ON IF YOU USE MAILGUN OR SMTP, YOU WILL COMMENT OUT ONE AREA*/
-    mg.sendText(/* PUT YOUR SENDER ADDRESS HERE */, [/* PUT YOUR "SEND TO" EMAIL HERE */], 'Good news! An iPhone reservation is availible!', JSON.stringify(body, null, 2))
+    mg.sendText(/* PUT YOUR SENDER ADDRESS HERE */, [/* PUT YOUR "SEND TO" EMAIL HERE */], 'Good news! An iPhone reservation is availible!', `<pre>${JSON.stringify(body, null, 2)}</pre>`)
     const mailOptions = {
       from: '"FIRSTNAME LASTNAME" <EMAIL@DOMAIN.COM>', /* PUT YOUR SENDER ADDRESS HERE */
       to: 'EMAIL@DOMAIN.COM', /* PUT YOUR "SEND TO" EMAIL HERE */
       subject: 'Good news! An iPhone reservation is availible!',
-      text: JSON.stringify(body, null, 2),
-      html: JSON.stringify(body, null, 2)
+      html: `<pre>${JSON.stringify(body, null, 2)}</pre>`
     }
     smtp.sendMail(mailOptions, (err, info) => {
       if (err) console.error(err)
